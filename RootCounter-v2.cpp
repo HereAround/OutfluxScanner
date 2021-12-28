@@ -22,7 +22,6 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
     std::vector<std::vector<int>> partitions;
     my_partitions(h0_value, degrees.size(), std::vector<int>(degrees.size(),0), std::vector<int>(degrees.size(),h0_value), partitions);
     
-    
     // (2) Find corresponding fluxes
     // (2) Find corresponding fluxes
     struct flux_data{
@@ -98,19 +97,28 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
                 // check if the sum of fluxes equals the number of edges * root
                 if (std::accumulate(currentSnapshot.flux.begin(),currentSnapshot.flux.end(),0) == root * edges.size()){
                     outfluxes.push_back(currentSnapshot);
+                    std::cout << "(";
+                    for (int l = 0; l < currentSnapshot.partition.size(); l++){
+                        std::cout << currentSnapshot.partition[l] << ",";
+                    }
+                    std::cout << ")\t(";
+                    for (int l = 0; l < currentSnapshot.flux.size(); l++){
+                        std::cout << currentSnapshot.flux[l] << ",";
+                    }
+                    std::cout << ")\n";
                 }
             }
             
         }
     
     }
-
     
     // (3) Count weight assignments
     // (3) Count weight assignments
     struct comb_data{
         std::vector<int> flux;
         int k;
+        boost::multiprecision::int128_t mult;
     };
     //for (int i = 0; i < 1; i++){
     for (int i = 0; i < outfluxes.size(); i++){
@@ -122,6 +130,7 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
         comb_data currentSnapshot;
         currentSnapshot.flux = outfluxes[i].flux;
         currentSnapshot.k = 0;
+        currentSnapshot.mult = (boost::multiprecision::int128_t) 1;
         snapshotStack.push(currentSnapshot);
         
         // Run...
@@ -133,10 +142,11 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
             snapshotStack.pop();
             
             // if action required
-            if (currentSnapshot.k <= 2){
+            if (currentSnapshot.k < graph_stratification.size()){
                 
                 // compute all partitions for flux on k-th component
                 std::vector<std::vector<int>> partitions;
+                std::vector<boost::multiprecision::int128_t> subpartitions;
                 int N = currentSnapshot.flux[currentSnapshot.k];
                 int n = graph_stratification[currentSnapshot.k][0].size();
                 std::vector<int> minima, maxima;
@@ -153,7 +163,24 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
                     minima.push_back(min);
                     maxima.push_back(max);
                 }
-                my_partitions(N, n, minima, maxima, partitions);
+                /*std::cout << "Partition: " << N << "," << n << ",(";
+                for (int l = 0; l < minima.size(); l++){
+                    std::cout << minima[l] << ",";
+                }
+                std::cout << "),(";
+                for (int l = 0; l < maxima.size(); l++){
+                    std::cout << maxima[l] << ",";
+                }
+                std::cout << "): ";*/
+                my_partitions_v2(N, n, graph_stratification[currentSnapshot.k][1], minima, maxima, root, partitions, subpartitions);
+                //my_partitions_v2(N, n, graph_stratification[currentSnapshot.k][1], minima, maxima, root, partitions);
+                
+                // This ignores that we have various possibilities to partition the flux among two nodes, once the outflux in this direction is fixed. Need to adjust the combinatorics function.
+                // Each partition must be accompanied by these combinatorics factors.
+                // In particular, we only need the number of these "subpartition", not the partitions themselves.
+                // This should not take tooo long (hopefully), but the coding takes some time.
+                
+                std::cout << "Total = " << partitions.size() << "\n";
                 
                 // create new snapshots
                 for(int j = 0; j < partitions.size(); j++){
@@ -170,14 +197,27 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
                     comb_data newSnapshot;
                     newSnapshot.flux = new_flux;
                     newSnapshot.k = currentSnapshot.k + 1;
+                    newSnapshot.mult = (boost::multiprecision::int128_t) 1;
+                    //newSnapshot.mult = currentSnapshot.mult * subpartitions[j];
                     snapshotStack.push(newSnapshot);
+                    
+                    // print data
+                    /*std::cout << "(";
+                    for (int l = 0; l < partitions[i].size(); l++){
+                        std::cout << partitions[i][l] << ",";
+                    }
+                    std::cout << ")\t(\n";
+                    for (int l = 0; l < newSnapshot.flux.size(); l++){
+                        std::cout << newSnapshot.flux[l] << ",";
+                    }
+                    std::cout << ")\n";*/
                     
                 }
                 
             }
             // no action required
             else{
-                boost::multiprecision::int128_t mult = 1;
+                boost::multiprecision::int128_t mult = currentSnapshot.mult;
                 for (int j = 0; j < genera.size(); j++){
                     if ((genera[j] == 1) and (outfluxes[i].partition[j] == 0)){
                         mult = mult * (boost::multiprecision::int128_t) (root * root - 1);

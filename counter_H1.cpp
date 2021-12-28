@@ -91,7 +91,7 @@ void distributionOfFlux(int index)
     ss << flux.substr(start, end - start);
     ss >> value;
     flux_vector.push_back(value);
-
+    
     // (3) Compute distribution on H1 on H2
     std::vector<boost::multiprecision::int128_t> dist_H1(h0Max + 1, 0);
     int total_flux = std::accumulate( flux_vector.begin(), flux_vector.end(), 0 );
