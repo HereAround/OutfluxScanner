@@ -8,6 +8,7 @@ unzip:
 install: uninstall
 	( g++ -c -lboost_thread WDiagram.cpp )
 	( g++ -c -lboost_thread counter_H1.cpp && g++ -o counter_H1 WDiagram.o counter_H1.o -lboost_thread -lpthread )
+	( g++ -c -lboost_thread new_counter_H1.cpp && g++ -o new_counter_H1 new_counter_H1.o -lboost_thread -lpthread )
 	( g++ -c -lboost_thread counter_H2.cpp && g++ -o counter_H2 WDiagram.o counter_H2.o -lboost_thread -lpthread )
 
 .PHONY: uninstall install
