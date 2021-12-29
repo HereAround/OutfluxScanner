@@ -1,155 +1,158 @@
-// A program to compute the number of minimal limit roots on full blowups of nodal curves
-
 #include <algorithm>
 #include <chrono>
 #include <functional>
 #include<fstream>
 #include<iostream>
 #include <mutex>
+#include <numeric>
 #include <sstream>
 #include <stack>
 #include <thread>
 #include <vector>
-
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include "compute_graph_information.cpp"
+#include "rootCounter-v2.cpp"
 
-// guard for thread-safe operations
-boost::mutex myGuard;
-
-#include "RootDistributionCounter.cpp"
 
 // Optimizations for speedup
 #pragma GCC optimize("Ofast")
 #pragma GCC target("avx,avx2,fma")
 
-// Number of threads
-const int number_threads = 8;
 
-
-// read the n-th line
-std::string ReadNthLine(const std::string& filename, int N)
+// read out fluxes
+std::vector<std::vector<int>> read_fluxes(const int & file_number, const int & start, const int & end)
 {
-    std::ifstream in(filename.c_str());
+    
+    // create file_name
+    std::string file_name = "data_H1/fluxes_H1_" + std::to_string(file_number);
+    
+    // can be open the file?
+    std::ifstream in(file_name.c_str());
     if(in.fail()){
-        std::cout << "File " << filename.c_str() << " not found \n";
+        std::cout << "File " << file_name.c_str() << " not found \n";
     }
+    
+    // reserve a string
     std::string s;
     s.reserve(15);
-    
-    // skip N lines
-    for(int i = 0; i < N; ++i){
+        
+    // skip as many lines as specified by variable start
+    for(int j = 0; j < start; j++){
         std::getline(in, s);
     }
+    
+    // now read
+    std::vector<std::vector<int>> fluxes;
+    for(int i = start; i <= end; i++){
         
-    // the get line
-    std::getline(in,s);
-    return s; 
+        // the get line
+        std::getline(in,s);
+        
+        // cast the string s into a vector
+        std::vector<int> flux;
+        int pos0 = 0;
+        int pos1 = s.find(",");
+        int value;
+        while (pos1 != -1) {
+            std::stringstream ss;
+            ss << s.substr(pos0, pos1 - pos0);
+            ss >> value;
+            flux.push_back(value);
+            pos0 = pos1 + 1;
+            pos1  = s.find(",", pos0);
+        }
+        std::stringstream ss;
+        ss << s.substr(pos0, pos1 - pos0);
+        ss >> value;
+        flux.push_back(value);
+        
+        // save flux
+        fluxes.push_back(flux);
+        
+    }
+    
+    // return the result
+    return fluxes;
+    
 }
 
 
-// Determine root distribution for given outflux
-void distributionOfFlux(int index)
+
+// determine root distribution for given outflux
+void count_roots(const int & file_number, const int & start, const int & end)
 {
 
-    // (0) Hard coded information about diagram 88
-    int numberVertices = 5;
-    std::vector<int> vertices = {0,1,2,3,4};
-    std::vector<int> degrees_H1 = {42, 210, 84, 42, 42};
-    std::vector<int> genera = {0,1,0,0,0};
-    int numberEdges = 9;
-    std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};
-    std::vector<int> external_legs = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4};
-    std::vector<int> legs_per_component = {2, 10, 4, 2, 2};
-    int genus = 6;
+    // (0) hard coded information for diagram 88
+    int h0Max = 4;
     int root = 20;
-    int h0Min = 0;
-    int h0Max = 10;
-    bool display_details = false;
+    int genus = 6;
+    std::vector<int> degrees = {42, 210, 84, 42, 42};
+    std::vector<int> genera = {0,1,0,0,0};
+    std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};
     
-    // (1) Read flux
-    int file_number = (int) index / 1000000;
-    int line_number = index % 1000000;
-    std::string file_name = "data_H1/fluxes_H1_" + std::to_string(file_number);
-    std::string flux = ReadNthLine( file_name, line_number );
+    // (1) compute additional information about this diagram
+    std::vector<int> edge_numbers(degrees.size(),0);
+    std::vector<std::vector<std::vector<int>>> graph_stratification;
+    additional_graph_information(edges, edge_numbers, graph_stratification);
     
-    // (2) Cast the flux string into a vector
-    std::vector<int> flux_vector;
-    int start = 0;
-    int end = flux.find(",");
-    int value;
-    while (end != -1) {
-        std::stringstream ss;
-        ss << flux.substr(start, end - start);
-        ss >> value;
-        flux_vector.push_back(value);
-        start = end + 1;
-        end = flux.find(",", start);
-    }
-    std::stringstream ss;
-    ss << flux.substr(start, end - start);
-    ss >> value;
-    flux_vector.push_back(value);
+    // (2) read fluxes
+    std::vector<std::vector<int>> fluxes = read_fluxes(file_number, start, end);
     
-    // (3) Compute distribution on H1 on H2
-    std::vector<boost::multiprecision::int128_t> dist_H1(h0Max + 1, 0);
-    int total_flux = std::accumulate( flux_vector.begin(), flux_vector.end(), 0 );
-    if ( total_flux % root == 0 ){
+    // (3) for each flux, compute the distribution
+    std::vector<std::vector<int>> non_trivial_fluxes;
+    std::vector<std::vector<boost::multiprecision::int128_t>> non_trivial_distributions;
+    for (int i = 0; i < fluxes.size(); i++){
         
-        // (3.1) Generate weights for the outflux
-        std::vector<int> external_weights(external_legs.size());
-        int iterator = 0;
-        for ( int j = 0; j < legs_per_component.size(); j++ ){
-            int flux_for_component = flux_vector[j];
-            int leg_number = legs_per_component[j];
-            int remaining_legs = leg_number;
-            for (int k = 0; k < leg_number; k++){
-                external_weights[iterator] = flux_for_component / remaining_legs;
-                flux_for_component = flux_for_component - (flux_for_component / remaining_legs);
-                remaining_legs = remaining_legs - 1;
-                iterator = iterator + 1;
-            }
+        // (3.0) print status
+        std::cout << "Status: " << i << '\r';
+        
+        // (3.1) compute the "reduced" degrees
+        for (int j = 0; j < degrees.size(); j++){
+            degrees[j] -= fluxes[i][j];
         }
         
-        // (3.2) Compute distribution on H1
-        WeightedDiagramWithExternalLegs dia_H1 = WeightedDiagramWithExternalLegs(vertices, degrees_H1, genera, edges, external_legs, external_weights, genus, root);
-        int h0MinUsed_H1 = dia_H1.get_h0_min();
-        std::vector<boost::multiprecision::int128_t> n_H1(h0Max - h0MinUsed_H1 + 1, 0);
-        if (h0Max >= h0MinUsed_H1){
-            countRootDistribution(dia_H1, number_threads, h0MinUsed_H1, h0Max, n_H1, display_details);
-            for (int j = 0; j < n_H1.size(); j++){
-                dist_H1[h0MinUsed_H1+j] = n_H1[j];
-            }
+        // (3.2) compute distribution on H1
+        std::vector<boost::multiprecision::int128_t> dist(h0Max + 1, 0);
+        for (int j = 0; j <= h0Max; j++){
+            dist[j] = NewRootDistributionCounter(degrees, genera, edges, root, graph_stratification, edge_numbers, j);
         }
-    
+        
+        // (3.3) remember non-trivial results
+        bool zeros = std::all_of(dist.begin(), dist.end(), [](boost::multiprecision::int128_t j) { return j==0; });
+        if (!zeros){
+            non_trivial_fluxes.push_back(fluxes[i]);
+            non_trivial_distributions.push_back(dist);
+        }
+        
+        // 3.5 flush line
+        std::cout.flush();
+        
     }
+    
+    // (4) print non-trivial fluxes
+    std::ofstream ofile;
+    ofile.open("results_H1/good_fluxes_H1_" + std::to_string(file_number), std::ios_base::app);
+    for (int i = 0; i < non_trivial_fluxes.size(); i++){
+        for (int j = 0; j < non_trivial_fluxes[i].size() -1; j ++){
+            ofile << non_trivial_fluxes[i][j] << ",";
+        }
+        ofile << non_trivial_fluxes[i][non_trivial_fluxes[i].size()-1] << "\n";
+    }
+    ofile.close();
 
-    // (4) Save non-trivial results on H1
-    bool zeros = std::all_of(dist_H1.begin(), dist_H1.end(), [](boost::multiprecision::int128_t j) { return j==0; });
-    if (!zeros){
-        
-        // save this non-trivial flux
-        std::ofstream ofile;
-        ofile.open("results_H1/good_fluxes_H1_" + std::to_string(file_number), std::ios_base::app);
-        for ( int i = 0; i < flux_vector.size() -1; i ++ ){
-            ofile << flux_vector[i] << ",";
+    // (5) print non-trivial distributions
+    ofile.open("results_H1/distribution_H1_" + std::to_string(file_number), std::ios_base::app);
+    for (int i = 0; i < non_trivial_distributions.size(); i++){
+        for (int j = 0; j < non_trivial_distributions[i].size() -1; j ++){
+            ofile << non_trivial_distributions[i][j] << ",";
         }
-        ofile << flux_vector[flux_vector.size()-1] << "\n";
-        ofile.close();
-        
-        // save this non-trivial distribution
-        ofile.open("results_H1/distribution_H1_" + std::to_string(file_number), std::ios_base::app);
-        for ( int i = 0; i < dist_H1.size() -1; i ++ ){
-            ofile << dist_H1[i] << ",";
-        }
-        ofile << dist_H1[dist_H1.size()-1] << "\n";
-        ofile.close();
-        
+        ofile << non_trivial_distributions[i][non_trivial_distributions[i].size()-1] << "\n";
     }
-
+    ofile.close();
+    
 }
-
 
 
 // #################
@@ -176,23 +179,20 @@ int main(int argc, char* argv[]) {
     }
     
     // check input
-    int start = input[0];
-    int end = input[1];
-    if ( start < 0 || end >= 728998 ){
-        std::cout << "Flux index too small or too large.\n";
+    int file_number = input[0];
+    int start = input[1];
+    int end = input[2];
+    if (start < 0 || end >= 728998 || file_number != 0){
+        std::cout << "Invalid input.\n";
         return -1;
     }
     
     // compute distribution for given flux index
     std::cout << "Start: " << start << "\n";
     std::cout << "End: " << end << "\n\n";
-    for (int i = start; i <= end;  i++){
-        distributionOfFlux(i);
-        std::cout << i << "\n";
-    }
+    count_roots(file_number, start, end);
     
     // return success
     return 0;
     
 }
-//33463895

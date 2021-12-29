@@ -1,11 +1,12 @@
-WDiagram.o
 counter_H1
 counter_H1.o
 counter_H2
 counter_H2.o
+new_counter
+new_counter.o
+
 data_H1/fluxes_H1_*
 data_H2/fluxes_H2_*
+
 results_H1/*
 results_H2/*
-new_counter_H1
-new_counter_H1.o

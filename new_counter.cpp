@@ -11,16 +11,14 @@
 #include <stack>
 #include <thread>
 #include <vector>
-
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include "compute_graph_information.cpp"
+#include "rootCounter-v2.cpp"
 
 // guard for thread-safe operations
 boost::mutex myGuard;
-
-#include "compute_graph_information.cpp"
-#include "RootCounter-v2.cpp"
 
 // Optimizations for speedup
 #pragma GCC optimize("Ofast")
@@ -51,12 +49,12 @@ int main(int argc, char* argv[]) {
     }
     
     // Original diagram 88
-    /*int root = 20;
+    int root = 20;
     int genus = 6;
     std::vector<int> degrees = {16, 80, 32, 16, 16};
     std::vector<int> flux_vector = {0,0,0,0,0};
     std::vector<int> genera = {0,1,0,0,0};
-    std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};*/
+    std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};
     
     // Diagram 88
     /*int root = 20;
@@ -90,10 +88,15 @@ int main(int argc, char* argv[]) {
     std::vector<int> genera = {0,0,0};
     std::vector<std::vector<int>> edges = {{0,1},{0,1},{0,1},{0,1},{0,2},{1,2}};*/
     
-    // compute additional graph information
+    // compute the "reduced" degrees
+    for (int i = 0; i < degrees.size(); i++){
+        degrees[i] -= flux_vector[i];
+    }
+    
+    // compute additional graph information    
     std::vector<int> edge_numbers(degrees.size(),0);
     std::vector<std::vector<std::vector<int>>> graph_stratification;
-    additional_graph_information(flux_vector, edges, degrees, edge_numbers, graph_stratification);
+    additional_graph_information(edges, edge_numbers, graph_stratification);
     
     // which h0 are we counting?
     int h0_value = input[0];

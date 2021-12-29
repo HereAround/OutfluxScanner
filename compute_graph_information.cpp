@@ -12,17 +12,10 @@ bool contains(const std::vector<T> & vec, const T & elem)
 
 // method to compute new graph_information
 void additional_graph_information(
-                                  const std::vector<int> & flux_vector,
                                   const std::vector<std::vector<int>> & edges,
-                                  std::vector<int> & degrees,
                                   std::vector<int> & edge_numbers,
                                   std::vector<std::vector<std::vector<int>>> & graph_stratification )
 {
-    
-    // compute the "reduced" degrees
-    for (int i = 0; i < degrees.size(); i++){
-        degrees[i] -= flux_vector[i];
-    }
     
     // compute the edge_numbers
     for (int i = 0; i < edges.size(); i++){
