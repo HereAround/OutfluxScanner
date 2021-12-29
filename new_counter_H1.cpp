@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     int genus = 6;
     int root = 20;
     std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,3,4},{1,1,1},{4,2,2}},{{2,3,4},{2,1,1},{2,1,1}},{{3,4},{1,1},{0,0}}};
-    std::vector<int> edge_numbers = {3,4,4,3,3};
+    std::vector<int> edge_numbers = {3,5,4,3,3};
     int h0_value = input[0];
     
     // Hard coded information about diagram 8
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<int>> edges = {{3, 0}, {2, 0}, {2, 3}, {0, 1}, {1, 3}, {1, 2}};
     int genus = 4;
     int root = 12;
-    std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2,3},{1,1,1},{2,3,2}},{{2,3},{1,1},{1,1}},{{3},{1},{0}}};
+    std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2,3},{1,1,1},{2,2,2}},{{2,3},{1,1},{1,1}},{{3},{1},{0}}};
     std::vector<int> edge_numbers = {3,3,3,3};
     int h0_value = input[0];*/
 
