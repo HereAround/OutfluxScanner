@@ -115,7 +115,11 @@ void count_roots(const int & file_number, const int & start, const int & end)
         
         // (3.2) compute distribution on H1
         std::vector<boost::multiprecision::int128_t> dist(h0Max + 1, 0);
-        for (int j = 0; j <= h0Max; j++){
+        int h0_min = (int)(std::accumulate(degrees.begin(),degrees.end(),0)/root) - genus + 1;
+        if (h0_min < 0){
+            h0_min = 0;
+        }
+        for (int j = h0_min; j <= h0Max; j++){
             dist[j] = NewRootDistributionCounter(degrees, genera, edges, root, graph_stratification, edge_numbers, j);
         }
         
