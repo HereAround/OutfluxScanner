@@ -19,10 +19,8 @@
 // guard for thread-safe operations
 boost::mutex myGuard;
 
-//^#include "RootDistributionCounter.cpp"
-//#include "ImprovedRootDistributionCounter.cpp"
+#include "compute_graph_information.cpp"
 #include "RootCounter-v2.cpp"
-
 
 // Optimizations for speedup
 #pragma GCC optimize("Ofast")
@@ -52,52 +50,63 @@ int main(int argc, char* argv[]) {
         input.push_back( number );
     }
     
-    // Hard coded information about diagram 88
-    std::vector<int> degrees_H1 = {42, 210, 84, 42, 42};
-    std::vector<int> flux_vector = {2,86,76,38,38};
-    for (int i = 0; i < degrees_H1.size(); i++){
-        degrees_H1[i] -= flux_vector[i];
-    }
-    std::vector<int> genera = {0,1,0,0,0};
-    std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};
+    // Diagram 88
+    /*int root = 20;
     int genus = 6;
-    int root = 20;
-    std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,3,4},{1,1,1},{4,2,2}},{{2,3,4},{2,1,1},{2,1,1}},{{3,4},{1,1},{0,0}}};
-    std::vector<int> edge_numbers = {3,5,4,3,3};
-    int h0_value = input[0];
+    std::vector<int> degrees = {42, 210, 84, 42, 42};
+    std::vector<int> flux_vector = {2,86,76,38,38};
+    std::vector<int> genera = {0,1,0,0,0};
+    std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};*/
     
-    // Hard coded information about diagram 8
-    /*std::vector<int> degrees_H1 = {12, 36, 12, 12};
-    std::vector<int> genera = {0,1,0,0};
-    std::vector<std::vector<int>> edges = {{3, 0}, {2, 0}, {2, 3}, {0, 1}, {1, 3}, {1, 2}};
+    //std::vector<int> edge_numbers = {3,5,4,3,3};
+    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,3,4},{1,1,1},{4,2,2}},{{2,3,4},{2,1,1},{2,1,1}},{{3,4},{1,1},{0,0}}};
+    
+    // Diagram 8
+    /*int root = 12;
     int genus = 4;
-    int root = 12;
-    std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2,3},{1,1,1},{2,2,2}},{{2,3},{1,1},{1,1}},{{3},{1},{0}}};
-    std::vector<int> edge_numbers = {3,3,3,3};
-    int h0_value = input[0];*/
-
+    std::vector<int> degrees = {12,36,12,12};
+    std::vector<int> flux_vector = {0,0,0,0};
+    std::vector<int> genera = {0,1,0,0};
+    std::vector<std::vector<int>> edges = {{3,0},{2,0},{2,3},{0,1},{1,3},{1,2}};*/
+    
+    //std::vector<int> edge_numbers = {3,3,3,3};
+    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2,3},{1,1,1},{2,2,2}},{{2,3},{1,1},{1,1}},{{3},{1},{0}}};
+    
+    
     // Hard coded information about example
-    /*std::vector<int> degrees_H1 = {4, 4};
-    std::vector<int> genera = {0,0};
-    std::vector<std::vector<int>> edges = {{0, 1}, {0, 1}};
+    /*int root = 2;
     int genus = 1;
-    int root = 2;
-    std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1},{2},{0}}};
-    std::vector<int> edge_numbers = {2,2};
-    int h0_value = input[0];*/
+    std::vector<int> degrees = {4,4};
+    std::vector<int> flux_vector = {0,0};
+    std::vector<int> genera = {0,0};
+    std::vector<std::vector<int>> edges = {{0,1},{0,1}};*/
+    
+    //std::vector<int> edge_numbers = {2,2};
+    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1},{2},{0}}};
+    
     
     // Hard coded example
-    /*int root = 8;
-    int h0_value = input[0];
+    int root = 8;
     int genus = 4;
-    std::vector<int> degrees_H1 = {16, 16, 16};
-    std::vector<int> genera = {0, 0, 0};
-    std::vector<std::vector<int>> edges = {{0,1}, {0,1}, {0,1}, {0,1}, {0,2}, {1,2}};
-    std::vector<int> edge_numbers = {5,5,2};
-    std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2},{4,1},{1,1}},{{2},{1},{0}}};*/
+    std::vector<int> degrees = {16,16,16};
+    std::vector<int> flux_vector = {0,0,0};
+    std::vector<int> genera = {0,0,0};
+    std::vector<std::vector<int>> edges = {{0,1},{0,1},{0,1},{0,1},{0,2},{1,2}};
+    
+    //std::vector<int> edge_numbers = {5,5,2};
+    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2},{4,1},{1,1}},{{2},{1},{0}}};
+    
+    
+    // compute additional graph information
+    std::vector<int> edge_numbers(degrees.size(),0);
+    std::vector<std::vector<std::vector<int>>> graph_stratification;
+    additional_graph_information(flux_vector, edges, degrees, edge_numbers, graph_stratification);
+    
+    // which h0 are we counting?
+    int h0_value = input[0];
     
     // Count roots with new algorithm
-    boost::multiprecision::int128_t total = NewRootDistributionCounter(degrees_H1, genera, edges, genus, root, graph_stratification, edge_numbers, h0_value );
+    boost::multiprecision::int128_t total = NewRootDistributionCounter(degrees, genera, edges, root, graph_stratification, edge_numbers, h0_value );
     std::cout << "Total: " << total << "\n";
     
     // return success

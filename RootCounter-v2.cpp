@@ -5,7 +5,6 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
                                 const std::vector<int> degrees,
                                 const std::vector<int> genera,
                                 const std::vector<std::vector<int>> edges,
-                                const int genus,
                                 const int root,
                                 const std::vector<std::vector<std::vector<int>>> graph_stratification,
                                 const std::vector<int> edge_numbers,
