@@ -1,5 +1,5 @@
 // Task: Compute partitions of an integer N into a sum of n integers with specified minima and maxima.
-void my_partitions(
+void comp_partitions(
         const int & N,
         const int & n,
         const std::vector<int> & minima,

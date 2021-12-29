@@ -17,7 +17,7 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
     // (1) Partition h0
     // (1) Partition h0
     std::vector<std::vector<int>> partitions;
-    my_partitions(h0_value, degrees.size(), std::vector<int>(degrees.size(),0), std::vector<int>(degrees.size(),h0_value), partitions);
+    comp_partitions(h0_value, degrees.size(), std::vector<int>(degrees.size(),0), std::vector<int>(degrees.size(),h0_value), partitions);
     
     
     // (2) Find corresponding fluxes
@@ -150,7 +150,7 @@ boost::multiprecision::int128_t NewRootDistributionCounter(
                 
                 // compute partitions
                 std::vector<std::vector<int>> partitions;
-                my_partitions(N, n, minima, maxima, partitions);
+                comp_partitions(N, n, minima, maxima, partitions);
                 
                 // create new snapshots
                 std::vector<int> number_of_edges = graph_stratification[currentSnapshot.k][1];
