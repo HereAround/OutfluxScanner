@@ -102,8 +102,11 @@ int main(int argc, char* argv[]) {
     int h0_value = input[0];
     
     // Count roots with new algorithm
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     boost::multiprecision::int128_t total = NewRootDistributionCounter(degrees, genera, edges, root, graph_stratification, edge_numbers, h0_value );
-    std::cout << "Total: " << total << "\n";
+    std::chrono::steady_clock::time_point later = std::chrono::steady_clock::now();
+    std::cout << "\nTime for run: " << std::chrono::duration_cast<std::chrono::seconds>(later - now).count() << "[s]\n";
+    std::cout << "Total: " << total << "\n";    
     
     // return success
     return 0;
