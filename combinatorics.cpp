@@ -1,5 +1,10 @@
 // Task: Compute partitions of an integer N into a sum of n integers with specified minima and maxima.
-void my_partitions(const int & N, const int & n, const std::vector<int> & minima, const std::vector<int> & maxima, std::vector<std::vector<int>> & partitions){
+void my_partitions(
+        const int & N,
+        const int & n,
+        const std::vector<int> & minima,
+        const std::vector<int> & maxima,
+        std::vector<std::vector<int>> & partitions){
     
     // Only one value to set?
     if(n == 1) {
@@ -71,14 +76,18 @@ void my_partitions(const int & N, const int & n, const std::vector<int> & minima
 // Input: Integer f to be partitioned.
 //           Integers r, n.
 // Output: The number of partitions of f into a sum of exactly n integers w1, ... wn with 1 <= w1, ..., wn < r.
-boost::multiprecision::int128_t number_partitions( const int & f, const int & n, const int & r ){
+boost::multiprecision::int128_t number_partitions(
+        const int & f,
+        const int & n,
+        const int & r)
+{
     
     // initialize the counter
     boost::multiprecision::int128_t count = (boost::multiprecision::int128_t) 0;
     
     // Only one value to set? Check if we have a partition
-    if( n == 1 ) {
-        if ( ( 1 <= f ) && ( f < r ) ){
+    if(n == 1) {
+        if ((1<= f)&&(f<r)){
             return (boost::multiprecision::int128_t) 1;
         }
         else{
@@ -87,8 +96,8 @@ boost::multiprecision::int128_t number_partitions( const int & f, const int & n,
     }
     
     // Pick values and make recursive call
-    for ( int i = 1; i < r; i++ ){
-        count = count + number_partitions( f - i, n-1, r );
+    for (int i = 1; i < r; i++){
+        count = count + number_partitions(f - i, n-1, r);
     }
     
     // return final result

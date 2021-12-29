@@ -3,7 +3,7 @@ template <typename T>
 bool contains(const std::vector<T> & vec, const T & elem)
 {
     bool result = false;
-    if( std::find(vec.begin(), vec.end(), elem) != vec.end() )
+    if(std::find(vec.begin(), vec.end(), elem) != vec.end())
     {
         result = true;
     }

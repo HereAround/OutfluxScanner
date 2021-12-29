@@ -58,9 +58,6 @@ int main(int argc, char* argv[]) {
     std::vector<int> genera = {0,1,0,0,0};
     std::vector<std::vector<int>> edges = {{4,0},{0,3},{2,3},{2,4},{0,1},{1,4},{1,3},{1,2},{1,2}};*/
     
-    //std::vector<int> edge_numbers = {3,5,4,3,3};
-    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,3,4},{1,1,1},{4,2,2}},{{2,3,4},{2,1,1},{2,1,1}},{{3,4},{1,1},{0,0}}};
-    
     // Diagram 8
     /*int root = 12;
     int genus = 4;
@@ -68,11 +65,7 @@ int main(int argc, char* argv[]) {
     std::vector<int> flux_vector = {0,0,0,0};
     std::vector<int> genera = {0,1,0,0};
     std::vector<std::vector<int>> edges = {{3,0},{2,0},{2,3},{0,1},{1,3},{1,2}};*/
-    
-    //std::vector<int> edge_numbers = {3,3,3,3};
-    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2,3},{1,1,1},{2,2,2}},{{2,3},{1,1},{1,1}},{{3},{1},{0}}};
-    
-    
+        
     // Hard coded information about example
     /*int root = 2;
     int genus = 1;
@@ -81,10 +74,6 @@ int main(int argc, char* argv[]) {
     std::vector<int> genera = {0,0};
     std::vector<std::vector<int>> edges = {{0,1},{0,1}};*/
     
-    //std::vector<int> edge_numbers = {2,2};
-    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1},{2},{0}}};
-    
-    
     // Hard coded example
     int root = 8;
     int genus = 4;
@@ -92,10 +81,6 @@ int main(int argc, char* argv[]) {
     std::vector<int> flux_vector = {0,0,0};
     std::vector<int> genera = {0,0,0};
     std::vector<std::vector<int>> edges = {{0,1},{0,1},{0,1},{0,1},{0,2},{1,2}};
-    
-    //std::vector<int> edge_numbers = {5,5,2};
-    //std::vector<std::vector<std::vector<int>>> graph_stratification = {{{1,2},{4,1},{1,1}},{{2},{1},{0}}};
-    
     
     // compute additional graph information
     std::vector<int> edge_numbers(degrees.size(),0);

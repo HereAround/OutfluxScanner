@@ -1,6 +1,6 @@
 #include "combinatorics.cpp"
 
-// Count root bundle distribution on nodal curve
+// Count number of root bundles with prescribed number of sections
 boost::multiprecision::int128_t NewRootDistributionCounter(
                                 const std::vector<int> degrees,
                                 const std::vector<int> genera,
