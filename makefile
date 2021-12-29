@@ -7,8 +7,8 @@ unzip:
 	( cd data_H2 && unzip fluxes_H2_part1.zip && unzip fluxes_H2_part2.zip )
 
 install: uninstall
-	( g++ -c -lboost_thread counter_H1.cpp && g++ -o counter_H1 counter_H1.o -lboost_thread -lpthread )
-	( g++ -c -lboost_thread counter_H2.cpp && g++ -o counter_H2 counter_H2.o -lboost_thread -lpthread )
-	( g++ -c -lboost_thread new_counter.cpp && g++ -o new_counter new_counter.o -lboost_thread -lpthread )
+	( g++ -std=gnu++11 -c -lboost_thread counter_H1.cpp && g++ -o counter_H1 counter_H1.o -lboost_thread -lpthread )
+	( g++ -std=gnu++11 -c -lboost_thread counter_H2.cpp && g++ -o counter_H2 counter_H2.o -lboost_thread -lpthread )
+	( g++ -std=gnu++11 -c -lboost_thread new_counter.cpp && g++ -o new_counter new_counter.o -lboost_thread -lpthread )
 
 .PHONY: uninstall install
