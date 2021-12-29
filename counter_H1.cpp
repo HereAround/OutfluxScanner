@@ -190,7 +190,10 @@ int main(int argc, char* argv[]) {
     // compute distribution for given flux index
     std::cout << "Start: " << start << "\n";
     std::cout << "End: " << end << "\n\n";
+    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     count_roots(file_number, start, end);
+    std::chrono::steady_clock::time_point later = std::chrono::steady_clock::now();
+    std::cout << "\nTime for run: " << std::chrono::duration_cast<std::chrono::seconds>(later - now).count() << "[s]\n";
     
     // return success
     return 0;
