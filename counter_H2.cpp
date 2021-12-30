@@ -13,8 +13,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include "compute_graph_information.cpp"
-#include "rootCounter-v2.cpp"
 
+// guards for thread-safe operations
+boost::mutex myGuard;
+#include "rootCounter-v2.cpp"
 
 // Optimizations for speedup
 #pragma GCC optimize("Ofast")

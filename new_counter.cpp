@@ -15,15 +15,18 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include "compute_graph_information.cpp"
-#include "rootCounter-v2.cpp"
 
 // guard for thread-safe operations
 boost::mutex myGuard;
+#include "rootCounter-v2.cpp"
 
 // Optimizations for speedup
 #pragma GCC optimize("Ofast")
 #pragma GCC target("avx,avx2,fma")
 
+// Global variables
+int thread_number = 8;
+int display_details = false;
 
 // #################
 // The main routine
@@ -93,20 +96,13 @@ int main(int argc, char* argv[]) {
         degrees[i] -= flux_vector[i];
     }
     
-    // compute additional graph information    
+    // compute additional information    
     std::vector<int> edge_numbers(degrees.size(),0);
     std::vector<std::vector<std::vector<int>>> graph_stratification;
     additional_graph_information(edges, edge_numbers, graph_stratification);
     
-    // which h0 are we counting?
-    int h0_value = input[0];
-    
-    // Count roots with new algorithm
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-    boost::multiprecision::int128_t total = NewRootDistributionCounter(degrees, genera, edges, root, graph_stratification, edge_numbers, h0_value );
-    std::chrono::steady_clock::time_point later = std::chrono::steady_clock::now();
-    std::cout << "\nTime for run: " << std::chrono::duration_cast<std::chrono::seconds>(later - now).count() << "[s]\n";
-    std::cout << "Total: " << total << "\n";    
+    // count roots
+    boost::multiprecision::int128_t total = parallel_root_counter(degrees, genera, edges, root, graph_stratification, edge_numbers, input[0], thread_number, display_details);
     
     // return success
     return 0;
