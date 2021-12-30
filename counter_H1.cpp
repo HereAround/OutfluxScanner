@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
     int file_number = input[0];
     int start = input[1];
     int end = input[2];
-    if (start < 0 || end >= 728998 || file_number != 0){
+    if (start < 0 || end >= 1000000 || file_number < 0 || file_number > 11){
         std::cout << "Invalid input.\n";
         return -1;
     }
