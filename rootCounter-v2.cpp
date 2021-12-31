@@ -1,10 +1,6 @@
 #include "combinatorics.cpp"
 
 
-// Switch detailed output on or off
-bool display_details = false;
-
-
 // Thread-safe addition to the result
 void UpdateCountThreadSafe(boost::multiprecision::int128_t & central, boost::multiprecision::int128_t & change)
 {    
@@ -32,8 +28,7 @@ void worker(
     // save total number of roots found
     boost::multiprecision::int128_t total = 0;
     
-    // (2) Count weight assignments
-    // (2) Count weight assignments
+    // count weight assignments
     struct comb_data{
         std::vector<int> flux;
         int k;
@@ -81,29 +76,44 @@ void worker(
                 }
                 
                 // compute flux_partitions
-                std::vector<std::vector<int>> flux_partitions;
-                comp_partitions(N, n, minima, maxima, flux_partitions);
-                
-                // create new snapshots
-                std::vector<int> number_of_edges = graph_stratification[currentSnapshot.k][1];
-                for(int j = 0; j < flux_partitions.size(); j++){
+                if (N == 0 && n == 0){
                     
-                    // create data of new snapshot (in particular the number of subpartitions)
-                    boost::multiprecision::int128_t mult = currentSnapshot.mult;
-                    std::vector<int> new_flux(currentSnapshot.flux.begin(), currentSnapshot.flux.end());
-                    new_flux[currentSnapshot.k] = 0;
-                    for (int a = 0; a < n; a++){
-                        int index = graph_stratification[currentSnapshot.k][0][a];
-                        new_flux[index] = new_flux[index] - (root * graph_stratification[currentSnapshot.k][1][a] - flux_partitions[j][a]);
-                        mult = mult * number_partitions(flux_partitions[j][a], number_of_edges[a], root);
-                    }
-                    
-                    // add snapshot
+                    // all weights set, just increase k
                     comb_data newSnapshot;
-                    newSnapshot.flux = new_flux;
-                    newSnapshot.mult = mult;
+                    newSnapshot.flux = currentSnapshot.flux;
+                    newSnapshot.mult = currentSnapshot.mult;
                     newSnapshot.k = currentSnapshot.k + 1;
                     snapshotStack.push(newSnapshot);
+                    
+                }
+                else{
+                    
+                    // not all weights are determined -> iterate over flux_partitions
+                    std::vector<std::vector<int>> flux_partitions;
+                    comp_partitions(N, n, minima, maxima, flux_partitions);
+                
+                    // create new snapshots
+                    std::vector<int> number_of_edges = graph_stratification[currentSnapshot.k][1];
+                    for(int j = 0; j < flux_partitions.size(); j++){
+                    
+                        // create data of new snapshot (in particular the number of subpartitions)
+                        boost::multiprecision::int128_t mult = currentSnapshot.mult;
+                        std::vector<int> new_flux(currentSnapshot.flux.begin(), currentSnapshot.flux.end());
+                        new_flux[currentSnapshot.k] = 0;
+                        for (int a = 0; a < n; a++){
+                            int index = graph_stratification[currentSnapshot.k][0][a];
+                            new_flux[index] = new_flux[index] - (root * graph_stratification[currentSnapshot.k][1][a] - flux_partitions[j][a]);
+                            mult = mult * number_partitions(flux_partitions[j][a], number_of_edges[a], root);
+                        }
+                    
+                        // add snapshot
+                        comb_data newSnapshot;
+                        newSnapshot.flux = new_flux;
+                        newSnapshot.mult = mult;
+                        newSnapshot.k = currentSnapshot.k + 1;
+                        snapshotStack.push(newSnapshot);
+                        
+                    }
                     
                 }
                 

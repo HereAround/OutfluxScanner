@@ -16,6 +16,7 @@
 
 // guards for thread-safe operations
 boost::mutex myGuard;
+bool display_details = true;
 #include "rootCounter-v2.cpp"
 
 // Optimizations for speedup

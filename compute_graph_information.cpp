@@ -78,7 +78,7 @@ void additional_graph_information(
         }
         
         // check if we are done: are there no remaining edges?
-        if (std::equal(remaining_edges.begin() + 1, remaining_edges.end(), remaining_edges.begin()) && remaining_edges[0] == 0){
+        if (new_edges.size() == 0){
             // yes -> end while loop
             test = false;
         }
