@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
     additional_graph_information(edges, edge_numbers, graph_stratification);
     
     // count roots
-    boost::multiprecision::int128_t sum = parallel_root_counter(degrees, genera, edges, root, graph_stratification, edge_numbers, input[0], thread_number);
+    boost::multiprecision::int128_t sum = parallel_root_counter(genus, degrees, genera, edges, root, graph_stratification, edge_numbers, input[0], thread_number);
     std::cout << "Total: " << sum << "\n\n";
     
     // return success

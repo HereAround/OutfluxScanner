@@ -135,6 +135,7 @@ void worker(
 
 // Count number of root bundles with prescribed number of sections
 boost::multiprecision::int128_t parallel_root_counter(
+                                const int genus,
                                 const std::vector<int> degrees,
                                 const std::vector<int> genera,
                                 const std::vector<std::vector<int>> edges,
@@ -146,6 +147,23 @@ boost::multiprecision::int128_t parallel_root_counter(
 {
     
     // check input
+    if (thread_number <= 0 or thread_number > 100){
+        std::cout << "Corrupted input\n";
+        return -1;
+    }
+    
+    // check for degenerate case: h0_min > h0_value
+    int total_degree = std::accumulate(degrees.begin(), degrees.end(), 0);
+    if ((int)(total_degree/root) - genus + 1 > h0_value){
+        return 0;
+    }
+    
+    // check for degenerate case: all degrees negative
+    if (std::all_of(degrees.begin(), degrees.end(), [](int j) { return j < 0; })){
+        return 0;
+    }
+    
+    // otherwise, check if the input data specifies a suitable number of threads
     if (thread_number <= 0 or thread_number > 100){
         std::cout << "Corrupted input\n";
         return -1;
