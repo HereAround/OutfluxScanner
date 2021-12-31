@@ -1,8 +1,12 @@
 #include "combinatorics.cpp"
 
 
+// Switch detailed output on or off
+bool display_details = false;
+
+
 // Thread-safe addition to the result
-void UpdateCountThreadSafe(boost::multiprecision::int128_t & central, boost::multiprecision::int128_t & change, const bool & display_details)
+void UpdateCountThreadSafe(boost::multiprecision::int128_t & central, boost::multiprecision::int128_t & change)
 {    
     boost::mutex::scoped_lock lock(myGuard);
     central = central + change;
@@ -14,20 +18,16 @@ void UpdateCountThreadSafe(boost::multiprecision::int128_t & central, boost::mul
 
 // Worker thread for parallel run
 void worker(
-                                const std::vector<std::vector<int>> combined_input,
+                                const std::vector<int> degrees,
+                                const std::vector<int> genera,
                                 const std::vector<std::vector<int>> edges,
                                 const int root,
                                 const std::vector<std::vector<std::vector<int>>> graph_stratification,
                                 const std::vector<int> edge_numbers,
                                 const std::vector<std::vector<int>> outfluxes,
                                 const std::vector<std::vector<int>> partitions,
-                                boost::multiprecision::int128_t & sum,
-                                const bool & display_details )
+                                boost::multiprecision::int128_t & sum )
 {
-    
-    // extract data
-    const std::vector<int> degrees = combined_input[0];
-    const std::vector<int> genera = combined_input[1];
     
     // save total number of roots found
     boost::multiprecision::int128_t total = 0;
@@ -127,7 +127,7 @@ void worker(
     }
     
     // Update result
-    UpdateCountThreadSafe(sum, total, display_details);
+    UpdateCountThreadSafe(sum, total);
     
 }
 
@@ -142,8 +142,7 @@ boost::multiprecision::int128_t parallel_root_counter(
                                 const std::vector<std::vector<std::vector<int>>> graph_stratification,
                                 const std::vector<int> edge_numbers,
                                 const int & h0_value,
-                                const int & thread_number,
-                                const bool & display_details )
+                                const int & thread_number )
 {
     
     // check input
@@ -255,15 +254,13 @@ boost::multiprecision::int128_t parallel_root_counter(
             if (i < thread_number - 1){
                 std::vector<std::vector<int>> partial_outfluxes(outfluxes.begin() + i * package_size, outfluxes.begin() + (i+1) * package_size);
                 std::vector<std::vector<int>> partial_h0_partitions(h0_partitions.begin() + i * package_size, h0_partitions.begin() + (i+1) * package_size);
-                std::vector<std::vector<int>> combined_input = {degrees, genera};
-                boost::thread *t = new boost::thread(worker, combined_input, edges, root, graph_stratification, edge_numbers, partial_outfluxes, partial_h0_partitions, boost::ref(sum), boost::ref(display_details));
+                boost::thread *t = new boost::thread(worker, degrees, genera, edges, root, graph_stratification, edge_numbers, partial_outfluxes, partial_h0_partitions, boost::ref(sum));
                 threadList.add_thread(t);
             }
             else{
                 std::vector<std::vector<int>> partial_outfluxes(outfluxes.begin() + i * package_size, outfluxes.end());
                 std::vector<std::vector<int>> partial_h0_partitions(h0_partitions.begin() + i * package_size, h0_partitions.end());
-                std::vector<std::vector<int>> combined_input = {degrees, genera};
-                boost::thread *t = new boost::thread(worker, combined_input, edges, root, graph_stratification, edge_numbers, partial_outfluxes, partial_h0_partitions, boost::ref(sum), boost::ref(display_details));
+                boost::thread *t = new boost::thread(worker, degrees, genera, edges, root, graph_stratification, edge_numbers, partial_outfluxes, partial_h0_partitions, boost::ref(sum));
                 threadList.add_thread(t);
             }
         }
@@ -273,8 +270,7 @@ boost::multiprecision::int128_t parallel_root_counter(
         if (display_details){
             std::cout << "Computing in one thread...\n";
         }
-        std::vector<std::vector<int>> combined_input = {degrees, genera};
-        worker(combined_input, edges, root, graph_stratification, edge_numbers, outfluxes, h0_partitions, boost::ref(sum), boost::ref(display_details));
+        worker(degrees, genera, edges, root, graph_stratification, edge_numbers, outfluxes, h0_partitions, boost::ref(sum));
     }
     std::chrono::steady_clock::time_point later = std::chrono::steady_clock::now();
     

@@ -24,7 +24,6 @@ boost::mutex myGuard;
 
 // Global variables
 int thread_number = 8;
-int display_details = false;
 
 // read out fluxes
 std::vector<std::vector<int>> read_fluxes(const int & file_number, const int & start, const int & end)
@@ -125,7 +124,7 @@ void count_roots(const int & file_number, const int & start, const int & end)
             h0_min = 0;
         }
         for (int j = h0_min; j <= h0Max; j++){
-            dist[j] = parallel_root_counter(degrees, genera, edges, root, graph_stratification, edge_numbers, j, thread_number, display_details);
+            dist[j] = parallel_root_counter(degrees, genera, edges, root, graph_stratification, edge_numbers, j, thread_number);
         }
         
         // (3.3) remember non-trivial results
