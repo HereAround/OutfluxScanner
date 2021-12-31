@@ -23,7 +23,7 @@ boost::mutex myGuard;
 #pragma GCC target("avx,avx2,fma")
 
 // Global variables
-int thread_number = 1;
+int thread_number = 8;
 int display_details = false;
 
 // read out fluxes

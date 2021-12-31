@@ -26,7 +26,7 @@ boost::mutex myGuard;
 
 // Global variables
 int thread_number = 8;
-int display_details = false;
+int display_details = true;
 
 // #################
 // The main routine
@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
     
     // count roots
     boost::multiprecision::int128_t total = parallel_root_counter(degrees, genera, edges, root, graph_stratification, edge_numbers, input[0], thread_number, display_details);
+    std::cout << "Total: " << sum << "\n\n";
     
     // return success
     return 0;
