@@ -156,13 +156,13 @@ void worker(
                     maxima.push_back(max);
                 }
                 
-                // compute partitions
-                std::vector<std::vector<int>> partitions;
-                comp_partitions(N, n, minima, maxima, partitions);
+                // compute flux_partitions
+                std::vector<std::vector<int>> flux_partitions;
+                comp_partitions(N, n, minima, maxima, flux_partitions);
                 
                 // create new snapshots
                 std::vector<int> number_of_edges = graph_stratification[currentSnapshot.k][1];
-                for(int j = 0; j < partitions.size(); j++){
+                for(int j = 0; j < flux_partitions.size(); j++){
                     
                     // create data of new snapshot (in particular the number of subpartitions)
                     boost::multiprecision::int128_t mult = currentSnapshot.mult;
@@ -170,8 +170,8 @@ void worker(
                     new_flux[currentSnapshot.k] = 0;
                     for (int a = 0; a < n; a++){
                         int index = graph_stratification[currentSnapshot.k][0][a];
-                        new_flux[index] = new_flux[index] - (root * graph_stratification[currentSnapshot.k][1][a] - partitions[j][a]);
-                        mult = mult * number_partitions(partitions[j][a], number_of_edges[a], root);
+                        new_flux[index] = new_flux[index] - (root * graph_stratification[currentSnapshot.k][1][a] - flux_partitions[j][a]);
+                        mult = mult * number_partitions(flux_partitions[j][a], number_of_edges[a], root);
                     }
                     
                     // add snapshot
