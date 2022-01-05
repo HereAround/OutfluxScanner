@@ -168,11 +168,6 @@ boost::multiprecision::int128_t parallel_root_counter(
         return 0;
     }
     
-    // check for degenerate case: all degrees negative
-    if (std::all_of(degrees.begin(), degrees.end(), [](int j) { return j < 0; })){
-        return 0;
-    }
-    
     // otherwise, check if the input data specifies a suitable number of threads
     if (thread_number <= 0 or thread_number > 100){
         std::cout << "Corrupted input\n";
